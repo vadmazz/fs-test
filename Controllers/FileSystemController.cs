@@ -1,5 +1,6 @@
-﻿using Fs.Models;
-using Fs.Services.Abstractions;
+﻿using Fs.Exceptions;
+using Fs.Interfaces;
+using Fs.Models;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -9,22 +10,37 @@ namespace Fs.Controllers;
 [ApiVersion("1")]
 [Route("v{version:apiVersion}")]
 [Tags("Файловая система")]
-public class FileSystemController
+public class FileSystemController : ControllerBase
 {
-    private readonly IFileStorageService _fileStorage;
+    private readonly IFileSystemService _fileSystem;
 
-    public FileSystemController(IFileStorageService fileStorage)
+    public FileSystemController(IFileSystemService fileSystem)
     {
-        _fileStorage = fileStorage;
+        _fileSystem = fileSystem;
     }
     
     [HttpPost]
     [SwaggerOperation("Загрузить файл")]
-    [SwaggerResponse(200, Description = "Файл загружен")]
-    [SwaggerResponse(500)]
+    [SwaggerResponse(200, Description = "Файл успешно загружен")]
+    [SwaggerResponse(400, Description = "Неверный размер файла")]
+    [SwaggerResponse(500, Description = "Ошибка на стороне сервера")]
     public async Task<ActionResult<ApiResponse<string>>> UploadFile(string fileName, [FromForm] IFormFile file)
     {
-        await _fileStorage.Upload(file);
-        return Ok(new ApiResponse<string>(link));
+        string? accessKey;
+
+        try
+        {
+            accessKey = await _fileSystem.Upload(fileName, file);
+        }
+        catch (InvalidFileSizeException)
+        {
+            return BadRequest();
+        }
+        catch (Exception)
+        {
+            return new StatusCodeResult(500);
+        }
+        
+        return Ok(new ApiResponse<string>(accessKey));
     }
 }

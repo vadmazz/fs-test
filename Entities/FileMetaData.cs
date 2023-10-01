@@ -6,16 +6,13 @@ namespace Fs.Entities;
 [Table("files")]
 public class FileMetaData
 {
+    /// <summary>
+    /// Ключ доступа к файлу
+    /// </summary>
     [Key]
     [Column("access_key")]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public Guid AccessKey { get; set; }
-
-    /// <summary>
-    /// Размер файла в мегабайтах
-    /// </summary>
-    [Column("size")]
-    public double Size { get; set; }
     
     /// <summary>
     /// Название файла
