@@ -1,5 +1,6 @@
 using Fs.Exceptions;
 using Fs.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Fs.Repositories;
 
@@ -90,6 +91,19 @@ public class DiskStorageRepository : IStorageRepository
         }
 
         return null;
+    }
+
+    public async Task<FileContentResult> GetByPath(string path)
+    {
+        var fileBytes = await File.ReadAllBytesAsync(path);
+        var mimeType = MimeHelper.GetMimeType(path);
+        if (mimeType is null)
+        {
+            _logger.LogError("Unable to parse mime type for file: {Path}", path);
+            throw new StorageException();
+        }
+
+        return new FileContentResult(fileBytes, mimeType);
     }
 
     private IEnumerable<string> GetAllFilePaths()

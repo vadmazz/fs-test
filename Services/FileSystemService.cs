@@ -1,6 +1,8 @@
+using System.Text.RegularExpressions;
 using Fs.Entities;
 using Fs.Exceptions;
 using Fs.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Fs.Services;
 
@@ -26,6 +28,9 @@ public class FileSystemService : IFileSystemService
     
     public async Task<string> Upload(string fileName, IFormFile fileContent)
     {
+        if (!IsFileNameCorrect(fileName))
+            throw new InvalidFileNameException();
+        
         var fileWithSameNameAlreadyExists = await _metaDataRepository.Exists(fileName);
         if (fileWithSameNameAlreadyExists)
             throw new FileAlreadyExistsException();
@@ -52,5 +57,25 @@ public class FileSystemService : IFileSystemService
         await _metaDataRepository.Add(metaData);
         
         return metaData.AccessKey.ToString();
+    }
+
+    private bool IsFileNameCorrect(string name)
+    {
+        return Regex.Match(name, "^[а-яА-ЯёЁa-zA-Z0-9.-_]+$").Success;
+    }
+    
+    public async Task<string?> GetFileAccessKeyByName(string fileName)
+    {
+        return await _metaDataRepository.GetFileAccessKeyByName(fileName);
+    }
+
+    public async Task<FileContentResult?> GetFileContentByAccessKey(string accessKey)
+    {
+        var path = await _metaDataRepository.GetPathByAccessKey(accessKey);
+        
+        if (path is null)
+            return null;
+        
+        return await _storage.GetByPath(path);
     }
 }

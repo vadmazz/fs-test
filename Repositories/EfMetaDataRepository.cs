@@ -35,11 +35,23 @@ public class EfMetaDataRepository : IMetaDataRepository, IDisposable
     
     public async Task<string?> GetFileAccessKeyByName(string fileName)
     {
-        return (await _dbContext.Files
-                .AsNoTracking()
-                .Select(f => new { AccessKey = f.AccessKey, Name = f.Name })
-                .FirstOrDefaultAsync(f => f.Name == fileName))
-            ?.AccessKey.ToString();
+        string? accessKey;
+        
+        try
+        {
+            accessKey = (await _dbContext.Files
+                    .AsNoTracking()
+                    .Select(f => new { AccessKey = f.AccessKey, Name = f.Name })
+                    .FirstOrDefaultAsync(f => f.Name == fileName))
+                ?.AccessKey.ToString();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Unable to find access key by fileName: {FileName}", fileName);
+            throw new MetaDataRepositoryException();
+        }
+
+        return accessKey;
     }
 
     public async Task<bool> Exists(string fileName)
@@ -65,6 +77,26 @@ public class EfMetaDataRepository : IMetaDataRepository, IDisposable
         }
 
         return accessKey;
+    }
+
+    public async Task<string?> GetPathByAccessKey(string accessKey)
+    {
+        string? path;
+        
+        try
+        {
+            path = (await _dbContext.Files
+                .AsNoTracking()
+                .Select(f => new { AccessKey = f.AccessKey, Path = f.Path })
+                .FirstOrDefaultAsync(f => f.AccessKey.ToString() == accessKey))?.Path.ToString();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Unable to find Path by access key: {AccessKey}", accessKey);
+            throw new MetaDataRepositoryException();
+        }
+
+        return path;
     }
 
     private bool _disposed;

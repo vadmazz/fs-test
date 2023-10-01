@@ -12,13 +12,14 @@ public interface IMetaDataRepository
     /// Добавить
     /// </summary>
     /// <param name="metaData">Meta data</param>
-    /// <exception cref="MetaDataRepositoryException"></exception>
+    /// <exception cref="MetaDataRepositoryException">Внутрення ошибка с репозиторием (базой данных)</exception>
     Task Add(FileMetaData metaData);
 
     /// <summary>
     /// Ищем access key по имени файла
     /// </summary>
     /// <param name="fileName">Имя файла</param>
+    /// <exception cref="MetaDataRepositoryException">Внутрення ошибка с репозиторием (базой данных)</exception>
     Task<string?> GetFileAccessKeyByName(string fileName);
     
     /// <summary>
@@ -28,4 +29,5 @@ public interface IMetaDataRepository
     Task<bool> Exists(string fileName);
 
     Task<string?> GetAccessKeyByFilePath(string path);
+    Task<string?> GetPathByAccessKey(string accessKey);
 }

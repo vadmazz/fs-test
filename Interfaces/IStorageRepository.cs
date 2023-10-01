@@ -1,4 +1,6 @@
-﻿namespace Fs.Interfaces;
+﻿using Microsoft.AspNetCore.Mvc;
+
+namespace Fs.Interfaces;
 
 /// <summary>
 /// Абстракция над разными хранилищами данных
@@ -19,4 +21,6 @@ public interface IStorageRepository
     /// <param name="fileContent">Содержимое с которым проверяем</param>
     /// <returns>File path до такого же файла</returns>
     Task<string?> GetFilePathWithSameContent(IFormFile fileContent);
+
+    Task<FileContentResult> GetByPath(string path);
 }
