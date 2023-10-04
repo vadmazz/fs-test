@@ -63,7 +63,7 @@ public class FileSystemService : IFileSystemService
 
     private bool IsFileNameCorrect(string name)
     {
-        return Regex.Match(name, "^[а-яА-ЯёЁa-zA-Z0-9.-_]+$").Success;
+        return Regex.Match(name, "^[а-яА-ЯёЁa-zA-Z0-9.-_/]+$").Success;
     }
     
     public async Task<string?> GetFileAccessKeyByName(string fileName)

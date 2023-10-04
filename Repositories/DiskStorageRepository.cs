@@ -37,11 +37,13 @@ public class DiskStorageRepository : IStorageRepository
             throw new InvalidFileSizeException();
         
         var filePath = Path.Combine(_rootPath, $"{fileName}{Path.GetExtension(fileContent.FileName)}");
-
-        await using var stream = new FileStream(filePath, FileMode.Create);
+        var directory = Path.GetDirectoryName(filePath);
         
+        if (directory is not null && !Directory.Exists(directory))
+            Directory.CreateDirectory(directory);
         try
         {
+            await using var stream = new FileStream(filePath, FileMode.Create);
             await fileContent.CopyToAsync(stream);
         }
         catch (Exception e)
@@ -108,6 +110,8 @@ public class DiskStorageRepository : IStorageRepository
 
     private IEnumerable<string> GetAllFilePaths()
     {
-        return Directory.GetFiles(_rootPath, "*.*", SearchOption.AllDirectories);
+        return Directory
+            .GetFiles(_rootPath, "*.*", SearchOption.AllDirectories)
+            .Select(p => p.Replace('\\', '/'));
     }
 }
