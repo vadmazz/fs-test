@@ -45,6 +45,8 @@ public class FileSystemService : IFileSystemService
                 _logger.LogError("Unable to find meta data for file from disk");
                 throw new InternalException();
             }
+
+            return accessKey;
         }
         
         var path = await _storage.Upload(fileName, fileContent);

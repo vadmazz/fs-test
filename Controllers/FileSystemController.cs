@@ -1,6 +1,6 @@
-﻿using Fs.Exceptions;
+﻿using System.ComponentModel.DataAnnotations;
+using Fs.Exceptions;
 using Fs.Interfaces;
-using Fs.Models;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -8,7 +8,7 @@ namespace Fs.Controllers;
 
 [ApiController]
 [ApiVersion("1")]
-[Route("v{version:apiVersion}")]
+[Route("v{version:apiVersion}/files")]
 [Tags("Файловая система")]
 public class FileSystemController : ControllerBase
 {
@@ -24,7 +24,9 @@ public class FileSystemController : ControllerBase
     [SwaggerResponse(200, Description = "Файл успешно загружен")]
     [SwaggerResponse(400, Description = "Неверный размер или название")]
     [SwaggerResponse(500, Description = "Ошибка на стороне сервера")]
-    public async Task<ActionResult<string>> UploadFile(string fileName, [FromForm] IFormFile file)
+    [SwaggerResponse(409, Description = "Файл с указанным именем уже существует")]
+    [Consumes("multipart/form-data")]
+    public async Task<ActionResult<string>> UploadFile(IFormFile file, [Required] string fileName)
     {
         string? accessKey;
 
@@ -35,6 +37,10 @@ public class FileSystemController : ControllerBase
         catch (InvalidFileNameException)
         {
             return BadRequest();
+        }
+        catch (FileAlreadyExistsException)
+        {
+            return Conflict();
         }
         catch (InvalidFileSizeException)
         {
@@ -77,7 +83,7 @@ public class FileSystemController : ControllerBase
     [SwaggerResponse(200)]
     [SwaggerResponse(404, Description = "Файл не существует")]
     [SwaggerResponse(500, Description = "Ошибка на стороне сервера")]
-    public async Task<ActionResult<FileContentResult>> GetFileByKey(string accessKey)
+    public async Task<IActionResult> GetFileByKey(string accessKey)
     {
         FileContentResult? file;
 
@@ -93,7 +99,6 @@ public class FileSystemController : ControllerBase
         if (file is null)
             return NotFound();
         
-        return Ok(accessKey);
+        return file;
     }
-
 }

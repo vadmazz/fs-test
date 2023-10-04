@@ -1,8 +1,8 @@
+using Fs;
 using Fs.Entities;
 using Fs.Interfaces;
 using Fs.Repositories;
 using Fs.Services;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +15,8 @@ builder.Services.AddScoped<IFileSystemService, FileSystemService>();
 builder.Services.AddScoped<IStorageRepository, DiskStorageRepository>();
 builder.Services.AddScoped<IMetaDataRepository, EfMetaDataRepository>();
 builder.Services.AddScoped<IFileContentComparer, FileContentComparer>();
+
+builder.Services.AddDbContext<CoreContext>();
 
 // Versioning
 builder.Services.AddApiVersioning(options => { options.ReportApiVersions = true; });

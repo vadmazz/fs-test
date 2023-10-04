@@ -11,9 +11,9 @@ namespace Fs.Repositories;
 public class EfMetaDataRepository : IMetaDataRepository, IDisposable
 {
     private readonly CoreContext _dbContext;
-    private readonly ILogger _logger;
+    private readonly ILogger<EfMetaDataRepository> _logger;
     
-    public EfMetaDataRepository(CoreContext dbContext, ILogger logger)
+    public EfMetaDataRepository(CoreContext dbContext, ILogger<EfMetaDataRepository> logger)
     {
         _dbContext = dbContext;
         _logger = logger;

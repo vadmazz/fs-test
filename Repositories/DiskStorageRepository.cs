@@ -26,7 +26,7 @@ public class DiskStorageRepository : IStorageRepository
         if (string.IsNullOrEmpty(rootPath))
             throw new ArgumentException("Invalid StoragePath");
         if (!Directory.Exists(rootPath))
-            throw new ArgumentException("StoragePath directory ({0}) does not exist", rootPath);
+            Directory.CreateDirectory(rootPath);
 
         _rootPath = rootPath;
     }
@@ -36,7 +36,7 @@ public class DiskStorageRepository : IStorageRepository
         if (fileContent.Length is <= 0 or > Const.BytesInOneGb) 
             throw new InvalidFileSizeException();
         
-        var filePath = Path.Combine(_rootPath, fileName);
+        var filePath = Path.Combine(_rootPath, $"{fileName}{Path.GetExtension(fileContent.FileName)}");
 
         await using var stream = new FileStream(filePath, FileMode.Create);
         
